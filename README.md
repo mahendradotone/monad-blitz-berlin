@@ -56,6 +56,23 @@ This project is live and demo-ready with:
 - a corrected board-coverage banner instead of a misleading per-player win claim
 - a leaderboard for presenter/demo use
 
+## Purpose & Significance
+
+Trailblazers is intentionally simple: it strips away wallet UX, token mechanics, and complicated game rules to make one EVM truth visible — cold vs warm storage cost — and make it easy for anyone to understand and explore.
+
+- **Why this matters:** cold/warm storage cost is a fundamental EVM property that shapes real-world contract design, gas optimizations, and long-term user experience. By surfacing this invisible cost as a live visual and numeric comparison, Trailblazers makes an abstract systems-level tradeoff immediately understandable to non-experts and experts alike.
+- **Educational value:** instructors and engineers can use the app to teach why storage writes are expensive, how re-use reduces cost, and how architecting for warm-paths can reduce gas in production contracts.
+- **Research & experimentation:** the app provides a repeatable, observable environment for benchmarking gas patterns, testing heuristics for storage reuse, and demonstrating the effect of storage access patterns under real chain conditions.
+
+## Potential Uses
+
+- Demo & outreach: a short, memorable demo in a talk or booth that makes gas mechanics feel tangible.
+- Prototyping: experiment with alternative scoring or reward mechanisms that encourage reuse, to study economic incentives in contract design.
+- Teaching: use the board in classroom settings to let students run experiments and immediately see gas consequences.
+- Benchmarking: pair Trailblazers with automated scripts to measure cold/warm ratios under different move distributions and network conditions.
+
+These sections are intentionally concise — they explain the premise and concrete ways the project can be reused, extended, and applied.
+
 ## Prerequisites
 
 - Node.js 18+
