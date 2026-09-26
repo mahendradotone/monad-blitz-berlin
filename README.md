@@ -1,23 +1,34 @@
-# Trailblazers
+# Trailblazers: Monad Blitz Berlin
 
-Trailblazers is a live Monad gas-game demo that turns cold-versus-warm storage costs into a playable board. Players race to claim fresh cells, while repeated touches become cheaper and more efficient.
+Trailblazers: Monad Blitz Berlin is a live on-chain gas-game demo built for the Monad testnet. Players claim cells on a 10x10 board, where the first touch is expensive and repeated touches become cheaper. The game turns cold-versus-warm storage economics into an interactive, competitive board.
 
-The project combines a React + Vite frontend with a Solidity contract deployed to the Monad testnet, using real on-chain state and a burner-wallet flow for live demo play.
-
-## What it does
-
-- 10x10 grid of storage cells
-- each move is an on-chain transaction
-- first touch = expensive cold-storage path
-- repeat touch = cheaper warm-storage path
-- scoring and heatmap reflect the real contract state
-- presenter mode surfaces gas ratios and live activity
+This repo contains the full project: a React + Vite frontend, Solidity smart contract logic, burner-wallet demo flow, and live presenter tooling for showcasing the game in a judge or event setting.
 
 ## Live demo
 
 Production app:
+- https://trailblazers-monad.vercel.app
 
+Legacy alias:
 - https://monad-blitz-berlin-web.vercel.app
+
+## What is in the game
+
+- 10x10 board of cells
+- on-chain move transactions
+- cold storage on first claim = expensive pioneer move
+- warm storage on repeat touches = cheaper follow-up move
+- real leaderboard by on-chain `playerScore(address)`
+- presenter dashboard with board coverage, gas totals, and live event ticker
+- burner-wallet flow for instant demo play on Monad testnet
+
+## Game loop
+
+- each move calls the smart contract
+- if a cell is unclaimed, the player becomes the pioneer
+- repeated visits to the same cell are cheaper and contribute to the warm-storage pattern
+- board coverage and player rank are tracked from live contract state
+- the presenter view shows who is leading and how much of the map is claimed
 
 ## Tech stack
 
@@ -26,19 +37,30 @@ Production app:
 - ethers.js
 - Solidity
 - Monad testnet
+- Vercel for production hosting
 
 ## Repository layout
 
-- `apps/web` — front-end app
-- `contracts` — smart contract source
-- `scripts` — wallet funding and deployment utilities
-- `docs` — Monad references and supporting notes
+- `apps/web` — frontend application
+- `contracts` — Solidity contract source
+- `scripts` — wallet funding and deployment helpers
+- `docs` — supporting references and notes
+
+## Current project status
+
+This project is live and demo-ready with:
+
+- a real game board and contract-backed play loop
+- live Monad testnet integration
+- multi-player score tracking from the contract
+- a corrected board-coverage banner instead of a misleading per-player win claim
+- a leaderboard for presenter/demo use
 
 ## Prerequisites
 
 - Node.js 18+
 - npm
-- a funded wallet for Monad testnet if you want to deploy or fund burner wallets
+- a funded Monad testnet wallet if you want to deploy or fund burner accounts
 
 ## Local development
 
@@ -49,7 +71,7 @@ npm install
 npm run dev --workspace apps/web
 ```
 
-The app runs at the default Vite address:
+The app runs on the default Vite port:
 
 - http://localhost:5173
 
@@ -61,7 +83,7 @@ Create the app environment file:
 cp apps/web/.env.example apps/web/.env
 ```
 
-Example values:
+Example:
 
 ```env
 VITE_RPC_URL=https://testnet-rpc.monad.xyz
@@ -71,21 +93,18 @@ VITE_CONTRACT_ADDRESS=0x0000000000000000000000000000000000000000
 
 ## Demo wallet flow
 
-The app uses a burner-wallet pattern for quick live demos:
+The app uses a burner-wallet model for quick live demos:
 
 - each player gets a random private key
-- the browser stores it locally
-- a team wallet funds the account with test MON
-- the funded wallet pays gas for each move
+- the browser stores the local key
+- a team wallet funds test MON to the burner account
+- the demo wallet pays gas for each move
 
-Important distinction:
-
-- wallet balance = MON used to pay gas
-- score = in-game points on the board / on-chain state
+This keeps live testing fast and avoids requiring each player to sign in with a permanent wallet.
 
 ## Contract overview
 
-The game logic rewards first-time discoveries more than repeated visits, matching the underlying cold-versus-warm storage economics.
+The game logic rewards first-time discoveries and tracks repeated touches, matching the cold-versus-warm storage economics of the underlying system.
 
 ```solidity
 function move(uint256 cellId) external {
@@ -111,7 +130,7 @@ export AMOUNT_ETH=0.05
 npm run fund-wallets
 ```
 
-## Scripts
+## Useful scripts
 
 ```bash
 npm run dev --workspace apps/web
