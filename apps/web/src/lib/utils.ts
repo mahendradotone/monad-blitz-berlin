@@ -3,15 +3,16 @@ export function truncateAddress(addr: string): string {
   return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 }
 
-export function formatGas(wei: bigint): string {
-  const gwei = Number(wei) / 1e9;
-  if (gwei >= 1_000_000) {
-    return `${(gwei / 1_000_000).toFixed(2)}M gwei`;
+export function formatGas(units: bigint): string {
+  const value = Number(units);
+  if (!Number.isFinite(value) || value <= 0) return '0 gas';
+  if (value >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(2)}M gas`;
   }
-  if (gwei >= 1_000) {
-    return `${(gwei / 1_000).toFixed(2)}K gwei`;
+  if (value >= 1_000) {
+    return `${(value / 1_000).toFixed(2)}K gas`;
   }
-  return `${gwei.toFixed(2)} gwei`;
+  return `${value.toLocaleString()} gas`;
 }
 
 export function formatMon(wei: bigint): string {
@@ -44,6 +45,6 @@ export function randomMockAddress(): string {
 }
 
 export function randomMockGas(): bigint {
-  const baseGwei = 21000 + Math.floor(Math.random() * 80000);
-  return BigInt(Math.floor(baseGwei * 1e9));
+  const baseUnits = 21_000 + Math.floor(Math.random() * 80_000);
+  return BigInt(baseUnits);
 }

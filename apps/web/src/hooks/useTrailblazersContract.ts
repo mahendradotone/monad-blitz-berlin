@@ -17,9 +17,15 @@ const POLL_INTERVAL_MS = 2000;
 
 interface TrailblazersState {
   cells: CellState[];
+  moveEvents: MoveEvent[];
   pioneerGasSpent: bigint;
   followerGasSpent: bigint;
-  moveEvents: MoveEvent[];
+  playerScore: bigint;
+  simulationEnabled: boolean;
+  simCells: CellState[];
+  simMoveEvents: MoveEvent[];
+  simPioneerGasSpent: bigint;
+  simFollowerGasSpent: bigint;
   connectionStatus: ConnectionStatus;
   pendingCell: number | null;
   lastError: string | null;
@@ -36,6 +42,27 @@ function createInitialCells(): CellState[] {
   }));
 }
 
+const createInitialState = (): TrailblazersState => {
+  const cells = createInitialCells();
+  return {
+    cells,
+    moveEvents: [],
+    pioneerGasSpent: 0n,
+    followerGasSpent: 0n,
+    playerScore: 0n,
+    simulationEnabled: false,
+    simCells: cells.map((cell) => ({ ...cell })),
+    simMoveEvents: [],
+    simPioneerGasSpent: 0n,
+    simFollowerGasSpent: 0n,
+    connectionStatus: 'connecting',
+    pendingCell: null,
+    lastError: null,
+    contract: null,
+    contractAddress: DEFAULT_CONTRACT_ADDRESS,
+  };
+};
+
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -45,17 +72,7 @@ export function useTrailblazersContract(
   provider: Provider | null,
   contractAddress: string = DEFAULT_CONTRACT_ADDRESS,
 ) {
-  const [state, setState] = useState<TrailblazersState>({
-    cells: createInitialCells(),
-    pioneerGasSpent: 0n,
-    followerGasSpent: 0n,
-    moveEvents: [],
-    connectionStatus: 'connecting',
-    pendingCell: null,
-    lastError: null,
-    contract: null,
-    contractAddress,
-  });
+  const [state, setState] = useState<TrailblazersState>(createInitialState());
 
   const contractRef = useRef<Contract | null>(null);
   const readContractRef = useRef<Contract | null>(null);
@@ -64,14 +81,7 @@ export function useTrailblazersContract(
   const lastPolledBlock = useRef<number>(0);
 
   const applyMoved = useCallback(
-    (
-      player: string,
-      cellId: number,
-      isPioneer: boolean,
-      visitCount: number,
-      gasUsed: bigint,
-      txHash?: string,
-    ) => {
+    (player: string, cellId: number, isPioneer: boolean, visitCount: number, gasUsed: bigint, txHash?: string) => {
       const key = `${txHash ?? ''}-${cellId}-${visitCount}-${player.toLowerCase()}`;
       if (seenEventKeys.current.has(key)) return;
       seenEventKeys.current.add(key);
@@ -92,12 +102,8 @@ export function useTrailblazersContract(
               }
             : c,
         ),
-        pioneerGasSpent: isPioneer
-          ? prev.pioneerGasSpent + gasUsed
-          : prev.pioneerGasSpent,
-        followerGasSpent: isPioneer
-          ? prev.followerGasSpent
-          : prev.followerGasSpent + gasUsed,
+        pioneerGasSpent: isPioneer ? prev.pioneerGasSpent + gasUsed : prev.pioneerGasSpent,
+        followerGasSpent: isPioneer ? prev.followerGasSpent : prev.followerGasSpent + gasUsed,
         moveEvents: [
           {
             player,
@@ -121,11 +127,17 @@ export function useTrailblazersContract(
         contract.totalPioneerGasSpent(),
         contract.totalFollowerGasSpent(),
       ]);
+
       setState((prev) => ({
         ...prev,
         pioneerGasSpent: pioneerGas,
         followerGasSpent: followerGas,
       }));
+
+      if (signer?.address) {
+        const score = await contract.playerScore(signer.address);
+        setState((prev) => ({ ...prev, playerScore: score }));
+      }
 
       const cells: CellState[] = [];
       for (let start = 0; start < TOTAL_CELLS; start += CELL_BATCH_SIZE) {
@@ -149,7 +161,7 @@ export function useTrailblazersContract(
         cells.push(...batch);
         if (end < TOTAL_CELLS) await sleep(150);
       }
-      // Merge so a move completed during load is not overwritten by a stale snapshot
+
       setState((prev) => ({
         ...prev,
         cells: cells.map((loaded) => {
@@ -161,9 +173,63 @@ export function useTrailblazersContract(
     } catch {
       // offline — keep defaults
     }
-  }, []);
+  }, [signer]);
 
-  // Connect to contract when provider/signer is available
+  const startHttpPolling = useCallback(
+    async (httpContract: Contract, httpProvider: Provider) => {
+      try {
+        const block = await httpProvider.getBlockNumber();
+        lastPolledBlock.current = Math.max(0, block - 5);
+      } catch {
+        lastPolledBlock.current = 0;
+      }
+
+      const poll = async () => {
+        try {
+          const fromBlock = lastPolledBlock.current + 1;
+          const currentBlock = await httpProvider.getBlockNumber();
+          if (currentBlock < fromBlock) return;
+
+          const events = await httpContract.queryFilter(
+            httpContract.filters.Moved(),
+            fromBlock,
+            currentBlock,
+          );
+          lastPolledBlock.current = currentBlock;
+
+          for (const ev of events) {
+            if (!('args' in ev) || !ev.args) continue;
+            const [player, cellId, isPioneer, visitCount, gasUsed] = ev.args as unknown as [
+              string,
+              bigint,
+              boolean,
+              number | bigint,
+              bigint,
+            ];
+            applyMoved(
+              player,
+              Number(cellId),
+              Boolean(isPioneer),
+              Number(visitCount),
+              BigInt(gasUsed),
+              ev.transactionHash,
+            );
+          }
+        } catch {
+          // transient RPC errors — keep polling
+        }
+      };
+
+      poll();
+      const interval = setInterval(() => {
+        void poll();
+      }, POLL_INTERVAL_MS);
+
+      return () => clearInterval(interval);
+    },
+    [applyMoved],
+  );
+
   useEffect(() => {
     if (!provider || !signer) {
       if (!provider) {
@@ -173,19 +239,11 @@ export function useTrailblazersContract(
     }
 
     let cancelled = false;
-    let pollTimer: ReturnType<typeof setInterval> | null = null;
+    let pollCleanup: (() => void) | undefined;
 
     async function setup() {
-      const httpContract = new ethers.Contract(
-        contractAddress,
-        TRAILBLAZERS_ABI,
-        provider,
-      );
-      const writeContract = new ethers.Contract(
-        contractAddress,
-        TRAILBLAZERS_ABI,
-        signer,
-      );
+      const httpContract = new ethers.Contract(contractAddress, TRAILBLAZERS_ABI, provider);
+      const writeContract = new ethers.Contract(contractAddress, TRAILBLAZERS_ABI, signer);
 
       contractRef.current = writeContract;
       readContractRef.current = httpContract;
@@ -201,16 +259,14 @@ export function useTrailblazersContract(
       await loadInitialState(httpContract);
       if (cancelled) return;
 
-      // Monad WS log subscriptions are currently unreliable (HTTP 500 / 429),
-      // so we intentionally avoid them and rely on the HTTP polling path.
-      await startHttpPolling(httpContract, provider!);
+      pollCleanup = await startHttpPolling(httpContract, provider);
     }
 
-    setup();
+    void setup();
 
     return () => {
       cancelled = true;
-      if (pollTimer) clearInterval(pollTimer);
+      pollCleanup?.();
       if (contractRef.current) {
         try {
           contractRef.current.removeAllListeners();
@@ -219,7 +275,7 @@ export function useTrailblazersContract(
         }
       }
     };
-  }, [provider, signer, contractAddress, loadInitialState, applyMoved]);
+  }, [provider, signer, contractAddress, loadInitialState, startHttpPolling]);
 
   const move = useCallback(async (cellId: number) => {
     if (!contractRef.current) return;
@@ -229,7 +285,6 @@ export function useTrailblazersContract(
       const receipt = await tx.wait();
       const txHash = receipt?.hash ?? tx.hash;
 
-      // Prefer parsing Moved from the receipt so UI updates without extra RPC
       let appliedFromReceipt = false;
       if (receipt && readContractRef.current) {
         try {
@@ -248,14 +303,7 @@ export function useTrailblazersContract(
                 bigint,
               ];
               if (Number(eventCellId) !== cellId) continue;
-              applyMoved(
-                player,
-                cellId,
-                Boolean(isPioneer),
-                Number(visitCount),
-                BigInt(gasUsed),
-                txHash,
-              );
+              applyMoved(player, cellId, Boolean(isPioneer), Number(visitCount), BigInt(gasUsed), txHash);
               appliedFromReceipt = true;
               break;
             } catch {
@@ -279,22 +327,17 @@ export function useTrailblazersContract(
             ]);
             if (!vis) continue;
             const visitCount = Number(count);
-            applyMoved(
-              pio || (signer?.address ?? ''),
-              cellId,
-              visitCount === 1,
-              visitCount,
-              0n,
-              txHash,
-            );
-            const [pioneerGas, followerGas] = await Promise.all([
+            applyMoved(pio || (signer?.address ?? ''), cellId, visitCount === 1, visitCount, 0n, txHash);
+            const [pioneerGas, followerGas, score] = await Promise.all([
               read.totalPioneerGasSpent(),
               read.totalFollowerGasSpent(),
+              signer?.address ? read.playerScore(signer.address) : Promise.resolve(0n),
             ]);
             setState((prev) => ({
               ...prev,
               pioneerGasSpent: pioneerGas,
               followerGasSpent: followerGas,
+              playerScore: score,
             }));
             break;
           } catch {
@@ -303,10 +346,14 @@ export function useTrailblazersContract(
         }
       }
 
+      if (signer?.address && readContractRef.current) {
+        const score = await readContractRef.current.playerScore(signer.address);
+        setState((prev) => ({ ...prev, playerScore: score }));
+      }
+
       return { success: true, hash: tx.hash };
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Transaction failed';
-      // Prefer a short user-facing reason
       let short = message;
       if (/insufficient funds/i.test(message)) {
         short = 'Insufficient MON — request testnet funds first';
@@ -320,10 +367,20 @@ export function useTrailblazersContract(
     } finally {
       setState((prev) => ({ ...prev, pendingCell: null }));
     }
-  }, [applyMoved, signer?.address]);
+  }, [applyMoved, signer]);
 
   const startSimulation = useCallback(() => {
     if (simulationRef.current) return;
+
+    setState((prev) => ({
+      ...prev,
+      simulationEnabled: true,
+      simCells: prev.cells.map((cell) => ({ ...cell })),
+      simMoveEvents: [...prev.moveEvents],
+      simPioneerGasSpent: prev.pioneerGasSpent,
+      simFollowerGasSpent: prev.followerGasSpent,
+    }));
+
     simulationRef.current = setInterval(() => {
       const cellId = Math.floor(Math.random() * TOTAL_CELLS);
       const player = randomMockAddress();
@@ -331,29 +388,27 @@ export function useTrailblazersContract(
       const isPioneer = Math.random() > 0.35;
 
       setState((prev) => {
-        const cell = prev.cells[cellId];
+        const cell = prev.simCells[cellId] ?? createInitialCells()[cellId];
         const willBePioneer = !cell.visited || isPioneer;
         const newVisitCount = cell.visitCount + 1;
+        const nextCells = prev.simCells.map((c) =>
+          c.id === cellId
+            ? {
+                ...c,
+                visited: true,
+                pioneer: c.visited ? c.pioneer : player,
+                visitCount: newVisitCount,
+              }
+            : c,
+        );
 
         return {
           ...prev,
-          cells: prev.cells.map((c) =>
-            c.id === cellId
-              ? {
-                  ...c,
-                  visited: true,
-                  pioneer: c.visited ? c.pioneer : player,
-                  visitCount: newVisitCount,
-                }
-              : c,
-          ),
-          pioneerGasSpent: willBePioneer
-            ? prev.pioneerGasSpent + gasUsed
-            : prev.pioneerGasSpent,
-          followerGasSpent: willBePioneer
-            ? prev.followerGasSpent
-            : prev.followerGasSpent + gasUsed,
-          moveEvents: [
+          simulationEnabled: true,
+          simCells: nextCells,
+          simPioneerGasSpent: willBePioneer ? prev.simPioneerGasSpent + gasUsed : prev.simPioneerGasSpent,
+          simFollowerGasSpent: willBePioneer ? prev.simFollowerGasSpent : prev.simFollowerGasSpent + gasUsed,
+          simMoveEvents: [
             {
               player,
               cellId,
@@ -362,7 +417,7 @@ export function useTrailblazersContract(
               gasUsed,
               timestamp: Date.now(),
             },
-            ...prev.moveEvents,
+            ...prev.simMoveEvents,
           ].slice(0, 10),
         };
       });
@@ -374,17 +429,35 @@ export function useTrailblazersContract(
       clearInterval(simulationRef.current);
       simulationRef.current = null;
     }
+    setState((prev) => ({
+      ...prev,
+      simulationEnabled: false,
+      simCells: prev.cells.map((cell) => ({ ...cell })),
+      simMoveEvents: [...prev.moveEvents],
+      simPioneerGasSpent: prev.pioneerGasSpent,
+      simFollowerGasSpent: prev.followerGasSpent,
+    }));
   }, []);
 
   useEffect(() => {
-    return () => stopSimulation();
-  }, [stopSimulation]);
+    return () => {
+      if (simulationRef.current) {
+        clearInterval(simulationRef.current);
+        simulationRef.current = null;
+      }
+    };
+  }, []);
 
   return {
     cells: state.cells,
+    moveEvents: state.moveEvents,
     pioneerGasSpent: state.pioneerGasSpent,
     followerGasSpent: state.followerGasSpent,
-    moveEvents: state.moveEvents,
+    playerScore: state.playerScore,
+    simCells: state.simCells,
+    simMoveEvents: state.simMoveEvents,
+    simPioneerGasSpent: state.simPioneerGasSpent,
+    simFollowerGasSpent: state.simFollowerGasSpent,
     connectionStatus: state.connectionStatus,
     pendingCell: state.pendingCell,
     lastError: state.lastError,

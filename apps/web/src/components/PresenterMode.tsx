@@ -55,7 +55,9 @@ export function PresenterMode({
   }, [moveEvents]);
 
   const totalGas = pioneerGasSpent + followerGasSpent;
-  const ratio = followerGasSpent > 0n ? Number(pioneerGasSpent) / Number(followerGasSpent) : 0;
+  const coldToWarmRatio = pioneerGasSpent > 0n && followerGasSpent > 0n
+    ? Number(pioneerGasSpent) / Number(followerGasSpent)
+    : 0;
   const claimedCells = cells.filter((cell) => cell.visited).length;
   const goalProgress = Math.min((claimedCells / GOAL_CELLS) * 100, 100);
 
@@ -78,9 +80,9 @@ export function PresenterMode({
             <span className="text-[10px] font-medium uppercase tracking-[0.16em]">Storage Cost Ratio</span>
           </div>
           <p className="mt-2 text-4xl font-bold text-white text-glow">
-            {ratio > 0 ? `1:${ratio.toFixed(1)}` : '—'}
+            {coldToWarmRatio > 0 ? `${coldToWarmRatio.toFixed(2)}x` : '—'}
           </p>
-          <p className="mt-1 text-xs text-slate-400">Cold vs warm storage access</p>
+          <p className="mt-1 text-xs text-slate-400">Cold storage cost vs warm reuse</p>
         </div>
 
         <StatCard
@@ -100,7 +102,7 @@ export function PresenterMode({
             <Trophy className="h-4 w-4 text-violet-300" />
             <span className="text-sm font-semibold">Win condition</span>
           </div>
-          <span className="font-mono text-xs text-cyan-300">{claimedCells}/100 cells</span>
+          <span className="font-mono text-xs text-cyan-300">{claimedCells}/{GOAL_CELLS} cells</span>
         </div>
         <div className="h-2.5 overflow-hidden rounded-full bg-slate-800">
           <div

@@ -3,6 +3,7 @@ export const TRAILBLAZERS_ABI = [
   'function visited(uint256) view returns (bool)',
   'function pioneer(uint256) view returns (address)',
   'function visitCount(uint256) view returns (uint32)',
+  'function playerScore(address) view returns (uint256)',
   'function totalPioneerGasSpent() view returns (uint256)',
   'function totalFollowerGasSpent() view returns (uint256)',
   'event Moved(address indexed player, uint256 indexed cellId, bool isPioneer, uint32 visitCount, uint256 gasUsed)',
