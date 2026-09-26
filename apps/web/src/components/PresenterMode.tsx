@@ -69,20 +69,20 @@ export function PresenterMode({
           label="Pioneer Gas (Cold)"
           value={formatGas(pioneerGasSpent)}
           accentColor="slate"
-          gradient="from-slate-50 to-white"
-          border="border-slate-200"
+          gradient="from-stone-50 to-white"
+          border="border-stone-200"
           subtitle="First storage touch"
         />
 
-        <div className="flex flex-col items-center justify-center rounded-[22px] border border-slate-200 bg-white p-5 shadow-card">
-          <div className="flex items-center gap-2 text-slate-600">
+        <div className="flex flex-col items-center justify-center rounded-[16px] border border-stone-200 bg-white p-5 shadow-[0_8px_20px_rgba(24,24,27,0.04)]">
+          <div className="flex items-center gap-2 text-stone-600">
             <TrendingUp className="h-5 w-5" />
             <span className="text-[10px] font-medium uppercase tracking-[0.16em]">Storage Cost Ratio</span>
           </div>
-          <p className="mt-2 text-4xl font-bold tracking-[-0.05em] text-slate-900">
+          <p className="mt-2 text-4xl font-bold tracking-[-0.05em] text-stone-900">
             {coldToWarmRatio > 0 ? `${coldToWarmRatio.toFixed(2)}x` : '—'}
           </p>
-          <p className="mt-1 text-xs text-slate-500">Cold storage cost vs warm reuse</p>
+          <p className="mt-1 text-xs text-stone-500">Cold storage cost vs warm reuse</p>
         </div>
 
         <StatCard
@@ -90,41 +90,41 @@ export function PresenterMode({
           label="Follower Gas (Warm)"
           value={formatGas(followerGasSpent)}
           accentColor="slate"
-          gradient="from-slate-50 to-white"
-          border="border-slate-200"
+          gradient="from-stone-50 to-white"
+          border="border-stone-200"
           subtitle="Repeated storage touch"
         />
       </div>
 
-      <div className="mb-6 rounded-[22px] border border-slate-200 bg-white p-4 shadow-card">
+      <div className="mb-6 rounded-[16px] border border-stone-200 bg-white p-4 shadow-[0_8px_20px_rgba(24,24,27,0.04)]">
         <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-slate-800">
+          <div className="flex items-center gap-2 text-stone-800">
             <Trophy className="h-4 w-4" />
             <span className="text-sm font-semibold">Win condition</span>
           </div>
-          <span className="font-mono text-xs text-slate-700">{claimedCells}/{GOAL_CELLS} cells</span>
+          <span className="font-mono text-xs text-stone-700">{claimedCells}/{GOAL_CELLS} cells</span>
         </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-slate-200">
+        <div className="h-2.5 overflow-hidden rounded-full bg-stone-200">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-slate-700 via-sky-500 to-emerald-500 transition-all duration-500"
+            className="h-full rounded-full bg-gradient-to-r from-stone-700 via-sky-500 to-emerald-500 transition-all duration-500"
             style={{ width: `${goalProgress}%` }}
           />
         </div>
-        <p className="mt-2 text-xs text-slate-500">
+        <p className="mt-2 text-xs text-stone-500">
           First player to claim {GOAL_CELLS} cells wins the round. Cold paths are costly, warm trails are efficient.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
-        <div className="rounded-[22px] border border-slate-200 bg-white p-5 shadow-card">
+        <div className="rounded-[16px] border border-stone-200 bg-white p-5 shadow-[0_8px_20px_rgba(24,24,27,0.04)]">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="flex items-center gap-2 text-lg font-bold text-slate-900">
-              <Activity className="h-5 w-5 text-slate-700" />
+            <h2 className="flex items-center gap-2 text-lg font-bold text-stone-900">
+              <Activity className="h-5 w-5 text-stone-700" />
               Trail Heatmap
             </h2>
-            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-slate-500">
+            <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.14em] text-stone-500">
               <span className="h-2 w-2 rounded-full bg-sky-500" /> Pioneer
-              <span className="ml-1 h-2 w-2 rounded-full bg-slate-400" /> Trail
+              <span className="ml-1 h-2 w-2 rounded-full bg-stone-400" /> Trail
             </div>
           </div>
           <Grid
@@ -137,23 +137,23 @@ export function PresenterMode({
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="rounded-[22px] border border-slate-200 bg-white p-4 shadow-card">
+          <div className="rounded-[16px] border border-stone-200 bg-white p-4 shadow-[0_8px_20px_rgba(24,24,27,0.04)]">
             <div className="mb-3 flex items-center gap-2">
-              <Settings2 className="h-4 w-4 text-slate-700" />
-              <h3 className="text-sm font-semibold text-slate-800">Controls</h3>
+              <Settings2 className="h-4 w-4 text-stone-700" />
+              <h3 className="text-sm font-semibold text-stone-800">Controls</h3>
             </div>
 
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Radio
-                  className={`h-4 w-4 ${simulationActive ? 'text-sky-600 animate-pulse' : 'text-slate-500'}`}
+                  className={`h-4 w-4 ${simulationActive ? 'text-sky-600 animate-pulse' : 'text-stone-500'}`}
                 />
-                <span className="text-sm text-slate-700">Simulate Live Game</span>
+                <span className="text-sm text-stone-700">Simulate Live Game</span>
               </div>
               <button
                 onClick={onToggleSimulation}
                 className={`relative h-6 w-11 rounded-full transition-colors ${
-                  simulationActive ? 'bg-slate-900' : 'bg-slate-300'
+                  simulationActive ? 'bg-stone-900' : 'bg-stone-300'
                 }`}
               >
                 <span
@@ -165,7 +165,7 @@ export function PresenterMode({
             </div>
 
             <div>
-              <label className="mb-1 block text-[10px] uppercase tracking-[0.14em] text-slate-500">
+              <label className="mb-1 block text-[10px] uppercase tracking-[0.14em] text-stone-500">
                 Contract Address
               </label>
               <input
@@ -173,7 +173,7 @@ export function PresenterMode({
                 value={contractAddress}
                 onChange={(e) => onContractAddressChange(e.target.value)}
                 placeholder="0x..."
-                className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 font-mono text-xs text-slate-800 outline-none transition-colors focus:border-slate-400"
+                className="w-full rounded-md border border-stone-200 bg-stone-50 px-3 py-2 font-mono text-xs text-stone-800 outline-none transition-colors focus:border-stone-400"
               />
             </div>
 
@@ -186,10 +186,10 @@ export function PresenterMode({
                       ? 'bg-amber-500'
                       : connectionStatus === 'connecting'
                         ? 'bg-amber-500 animate-pulse'
-                        : 'bg-slate-400'
+                        : 'bg-stone-400'
                 }`}
               />
-              <span className="text-slate-600">
+              <span className="text-stone-600">
                 {connectionStatus === 'live'
                   ? 'WebSocket Live'
                   : connectionStatus === 'http'
@@ -201,33 +201,33 @@ export function PresenterMode({
             </div>
           </div>
 
-          <div className="flex-1 rounded-[22px] border border-slate-200 bg-white p-4 shadow-card">
-            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-800">
-              <Activity className="h-4 w-4 text-slate-700" />
+          <div className="flex-1 rounded-[16px] border border-stone-200 bg-white p-4 shadow-[0_8px_20px_rgba(24,24,27,0.04)]">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-stone-800">
+              <Activity className="h-4 w-4 text-stone-700" />
               Live Event Ticker
             </h3>
             <div className="space-y-2">
               {moveEvents.length === 0 ? (
-                <div className="py-8 text-center text-sm text-slate-500">Waiting for moves...</div>
+                <div className="py-8 text-center text-sm text-stone-500">Waiting for moves...</div>
               ) : (
                 moveEvents.map((evt, i) => (
                   <div
                     key={`${evt.timestamp}-${evt.cellId}-${i}`}
-                    className={`animate-ticker-in flex items-center gap-2 rounded-lg border px-3 py-2.5 text-xs ${
+                    className={`animate-ticker-in flex items-center gap-2 rounded-md border px-3 py-2.5 text-xs ${
                       evt.isPioneer
-                        ? 'border-slate-200 bg-slate-50'
-                        : 'border-slate-200 bg-white'
-                    } ${i === 0 ? 'ring-1 ring-slate-200' : ''}`}
+                        ? 'border-stone-200 bg-stone-50'
+                        : 'border-stone-200 bg-white'
+                    } ${i === 0 ? 'ring-1 ring-stone-200' : ''}`}
                   >
                     {evt.isPioneer ? (
-                      <Flame className="h-3.5 w-3.5 shrink-0 text-slate-700" />
+                      <Flame className="h-3.5 w-3.5 shrink-0 text-stone-700" />
                     ) : (
-                      <Zap className="h-3.5 w-3.5 shrink-0 text-slate-700" />
+                      <Zap className="h-3.5 w-3.5 shrink-0 text-stone-700" />
                     )}
-                    <span className="shrink-0 font-mono text-slate-700">{truncateAddress(evt.player)}</span>
-                    <span className="text-slate-500">→</span>
-                    <span className="shrink-0 font-semibold text-slate-900">Cell {evt.cellId}</span>
-                    <span className="ml-auto shrink-0 font-mono text-slate-700">{formatGas(evt.gasUsed)}</span>
+                    <span className="shrink-0 font-mono text-stone-700">{truncateAddress(evt.player)}</span>
+                    <span className="text-stone-500">→</span>
+                    <span className="shrink-0 font-semibold text-stone-900">Cell {evt.cellId}</span>
+                    <span className="ml-auto shrink-0 font-mono text-stone-700">{formatGas(evt.gasUsed)}</span>
                   </div>
                 ))
               )}
@@ -236,9 +236,9 @@ export function PresenterMode({
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-center gap-2 text-sm text-slate-500">
+      <div className="mt-6 flex items-center justify-center gap-2 text-sm text-stone-500">
         <span>Total gas spent:</span>
-        <span className="font-mono font-bold text-slate-900">{formatGas(totalGas)}</span>
+        <span className="font-mono font-bold text-stone-900">{formatGas(totalGas)}</span>
       </div>
     </div>
   );
@@ -261,16 +261,16 @@ function StatCard({
   border: string;
   subtitle: string;
 }) {
-  const accentClass = 'text-slate-800';
+  const accentClass = 'text-stone-800';
 
   return (
-    <div className={`rounded-[22px] border bg-gradient-to-br ${gradient} ${border} p-5 shadow-card`}>
+    <div className={`rounded-[16px] border bg-gradient-to-br ${gradient} ${border} p-5 shadow-[0_8px_20px_rgba(24,24,27,0.04)]`}>
       <div className={`flex items-center gap-3 ${accentClass}`}>
         {icon}
         <span className="text-[10px] font-medium uppercase tracking-[0.16em]">{label}</span>
       </div>
-      <p className="mt-3 text-3xl font-bold tracking-[-0.05em] text-slate-900">{value}</p>
-      <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
+      <p className="mt-3 text-3xl font-bold tracking-[-0.05em] text-stone-900">{value}</p>
+      <p className="mt-1 text-xs text-stone-500">{subtitle}</p>
     </div>
   );
 }

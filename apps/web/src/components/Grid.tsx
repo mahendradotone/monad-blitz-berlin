@@ -13,14 +13,14 @@ interface GridProps {
 
 function getCellBg(cell: CellState): string {
   if (!cell.visited) {
-    return 'bg-slate-100 border-slate-200 text-slate-400';
+    return 'bg-stone-100 border-stone-200 text-stone-400';
   }
 
   const vc = cell.visitCount;
-  if (vc <= 1) return 'bg-sky-100 border-sky-300 shadow-[inset_0_0_0_1px_rgba(125,211,252,0.25)]';
-  if (vc <= 3) return 'bg-blue-100 border-blue-300 shadow-[inset_0_0_0_1px_rgba(147,197,253,0.25)]';
-  if (vc <= 6) return 'bg-slate-200 border-slate-400 shadow-[inset_0_0_0_1px_rgba(148,163,184,0.25)]';
-  return 'bg-slate-300 border-slate-500 shadow-[inset_0_0_0_1px_rgba(71,85,105,0.28)]';
+  if (vc <= 1) return 'bg-sky-100 border-sky-300';
+  if (vc <= 3) return 'bg-slate-100 border-slate-300';
+  if (vc <= 6) return 'bg-stone-200 border-stone-400';
+  return 'bg-stone-300 border-stone-500';
 }
 
 export function Grid({
@@ -77,23 +77,23 @@ function Cell({ cell, isPending, isPulsing, onClick, isPresenter }: CellProps) {
       onClick={onClick}
       disabled={isPending}
       aria-label={cell.visited ? `Cell ${cell.id} visited ${cell.visitCount} times` : `Cell ${cell.id} unvisited`}
-      className={`relative flex aspect-square items-center justify-center overflow-hidden rounded-md border text-[7px] font-mono transition-all duration-300 sm:text-[9px] ${bg} ${
-        isPending ? 'cursor-wait opacity-80' : 'cursor-pointer hover:scale-[1.04]'
-      } ${showPulse || isPulsing ? 'animate-cell-pulse' : ''} ${isPresenter ? 'sm:rounded-lg' : ''}`}
+      className={`relative flex aspect-square items-center justify-center overflow-hidden rounded-[6px] border text-[7px] font-mono transition-all duration-300 sm:text-[9px] ${bg} ${
+        isPending ? 'cursor-wait opacity-80' : 'cursor-pointer hover:scale-[1.02]'
+      } ${showPulse || isPulsing ? 'animate-cell-pulse' : ''} ${isPresenter ? 'sm:rounded-[7px]' : ''}`}
     >
       {isPending && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-950/70 backdrop-blur-[1px]">
+        <div className="absolute inset-0 flex items-center justify-center bg-stone-950/70 backdrop-blur-[1px]">
           <Loader2 className="h-3 w-3 animate-spin-slow text-white sm:h-4 sm:w-4" />
         </div>
       )}
 
       {!cell.visited && !isPending && (
-        <Snowflake className="h-2.5 w-2.5 text-slate-400 opacity-60 sm:h-3 sm:w-3" />
+        <Snowflake className="h-2.5 w-2.5 text-stone-400 opacity-60 sm:h-3 sm:w-3" />
       )}
 
       {showPioneer && !isPending && (
         <span
-          className="absolute inset-x-0 bottom-0 truncate px-0.5 text-center text-[6px] text-slate-700"
+          className="absolute inset-x-0 bottom-0 truncate px-0.5 text-center text-[6px] text-stone-700"
           title={cell.pioneer}
         >
           {truncateAddress(cell.pioneer)}
@@ -106,8 +106,8 @@ function Cell({ cell, isPending, isPulsing, onClick, isPresenter }: CellProps) {
             cell.visitCount <= 1
               ? 'text-sky-700'
               : cell.visitCount <= 5
-                ? 'text-slate-700'
-                : 'text-slate-900'
+                ? 'text-stone-700'
+                : 'text-stone-900'
           }`}
         >
           {cell.visitCount}
