@@ -13,14 +13,14 @@ interface GridProps {
 
 function getCellBg(cell: CellState): string {
   if (!cell.visited) {
-    return 'bg-slate-900/80 border-slate-700/80 text-slate-600';
+    return 'bg-slate-100 border-slate-200 text-slate-400';
   }
 
   const vc = cell.visitCount;
-  if (vc <= 1) return 'bg-cyan-500/30 border-cyan-300/80 shadow-[inset_0_0_0_1px_rgba(103,232,249,0.15)]';
-  if (vc <= 3) return 'bg-violet-500/40 border-violet-300/80 shadow-[inset_0_0_0_1px_rgba(196,181,253,0.15)]';
-  if (vc <= 6) return 'bg-fuchsia-500/45 border-fuchsia-300/80 shadow-[inset_0_0_0_1px_rgba(244,114,182,0.15)]';
-  return 'bg-rose-500/55 border-rose-300/80 shadow-[inset_0_0_0_1px_rgba(251,113,133,0.2)]';
+  if (vc <= 1) return 'bg-sky-100 border-sky-300 shadow-[inset_0_0_0_1px_rgba(125,211,252,0.25)]';
+  if (vc <= 3) return 'bg-blue-100 border-blue-300 shadow-[inset_0_0_0_1px_rgba(147,197,253,0.25)]';
+  if (vc <= 6) return 'bg-slate-200 border-slate-400 shadow-[inset_0_0_0_1px_rgba(148,163,184,0.25)]';
+  return 'bg-slate-300 border-slate-500 shadow-[inset_0_0_0_1px_rgba(71,85,105,0.28)]';
 }
 
 export function Grid({
@@ -88,12 +88,12 @@ function Cell({ cell, isPending, isPulsing, onClick, isPresenter }: CellProps) {
       )}
 
       {!cell.visited && !isPending && (
-        <Snowflake className="h-2.5 w-2.5 text-slate-500 opacity-60 sm:h-3 sm:w-3" />
+        <Snowflake className="h-2.5 w-2.5 text-slate-400 opacity-60 sm:h-3 sm:w-3" />
       )}
 
       {showPioneer && !isPending && (
         <span
-          className="absolute inset-x-0 bottom-0 truncate px-0.5 text-center text-[6px] text-white/80"
+          className="absolute inset-x-0 bottom-0 truncate px-0.5 text-center text-[6px] text-slate-700"
           title={cell.pioneer}
         >
           {truncateAddress(cell.pioneer)}
@@ -104,10 +104,10 @@ function Cell({ cell, isPending, isPulsing, onClick, isPresenter }: CellProps) {
         <span
           className={`text-[7px] font-bold sm:text-[9px] ${
             cell.visitCount <= 1
-              ? 'text-cyan-50'
+              ? 'text-sky-700'
               : cell.visitCount <= 5
-                ? 'text-violet-50'
-                : 'text-rose-50'
+                ? 'text-slate-700'
+                : 'text-slate-900'
           }`}
         >
           {cell.visitCount}

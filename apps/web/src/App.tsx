@@ -36,9 +36,13 @@ export default function App() {
 
   const handleCellClick = useCallback(
     (cellId: number) => {
-      trailblazers.move(cellId);
+      void trailblazers.move(cellId).then((result) => {
+        if (result?.success && wallet.provider && wallet.signer) {
+          void wallet.refreshBalance();
+        }
+      });
     },
-    [trailblazers],
+    [trailblazers, wallet.provider, wallet.signer, wallet.refreshBalance],
   );
 
   const handleToggleSimulation = useCallback(() => {
@@ -51,40 +55,47 @@ export default function App() {
     }
   }, [simulationActive, trailblazers]);
 
-  return (
-    <div className="min-h-screen bg-slate-950 bg-grid-pattern bg-radial-glow text-white">
-      <NavBar
-        mode={mode}
-        onModeChange={handleModeChange}
-        connectionStatus={trailblazers.connectionStatus}
-      />
+  const displayedCells = simulationActive ? trailblazers.simCells : trailblazers.cells;
+  const displayedMoves = simulationActive ? trailblazers.simMoveEvents : trailblazers.moveEvents;
 
-      <main className="animate-fade-in">
-        {mode === 'player' ? (
-          <PlayerView
-            wallet={wallet}
-            cells={trailblazers.cells}
-            pendingCell={trailblazers.pendingCell}
-            moveEvents={trailblazers.moveEvents}
-            lastError={trailblazers.lastError}
-            onCellClick={handleCellClick}
-          />
-        ) : (
-          <PresenterMode
-            cells={trailblazers.cells}
-            pendingCell={trailblazers.pendingCell}
-            moveEvents={trailblazers.moveEvents}
-            pioneerGasSpent={trailblazers.pioneerGasSpent}
-            followerGasSpent={trailblazers.followerGasSpent}
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900">
+      <div className="mx-auto max-w-[1600px] px-3 py-3 sm:px-5">
+        <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-white/80 shadow-[0_20px_60px_rgba(15,23,42,0.05)] backdrop-blur-sm">
+          <NavBar
+            mode={mode}
+            onModeChange={handleModeChange}
             connectionStatus={trailblazers.connectionStatus}
-            contractAddress={contractAddress}
-            onContractAddressChange={setContractAddress}
-            onCellClick={handleCellClick}
-            simulationActive={simulationActive}
-            onToggleSimulation={handleToggleSimulation}
           />
-        )}
-      </main>
+
+          <main className="animate-fade-in px-2 pb-2 sm:px-4">
+            {mode === 'player' ? (
+              <PlayerView
+                wallet={wallet}
+                cells={displayedCells}
+                playerScore={trailblazers.playerScore}
+                pendingCell={trailblazers.pendingCell}
+                moveEvents={displayedMoves}
+                onCellClick={handleCellClick}
+              />
+            ) : (
+              <PresenterMode
+                cells={displayedCells}
+                pendingCell={trailblazers.pendingCell}
+                moveEvents={displayedMoves}
+                pioneerGasSpent={simulationActive ? trailblazers.simPioneerGasSpent : trailblazers.pioneerGasSpent}
+                followerGasSpent={simulationActive ? trailblazers.simFollowerGasSpent : trailblazers.followerGasSpent}
+                connectionStatus={trailblazers.connectionStatus}
+                contractAddress={contractAddress}
+                onContractAddressChange={setContractAddress}
+                onCellClick={handleCellClick}
+                simulationActive={simulationActive}
+                onToggleSimulation={handleToggleSimulation}
+              />
+            )}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }

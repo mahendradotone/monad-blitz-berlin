@@ -259,6 +259,10 @@ export function useTrailblazersContract(
       await loadInitialState(httpContract);
       if (cancelled) return;
 
+      if (!provider) {
+        return;
+      }
+
       pollCleanup = await startHttpPolling(httpContract, provider);
     }
 

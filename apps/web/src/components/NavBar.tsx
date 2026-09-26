@@ -11,40 +11,38 @@ interface NavBarProps {
 
 const statusConfig: Record<ConnectionStatus, { color: string; label: string }> = {
   connecting: { color: 'bg-amber-400', label: 'Connecting' },
-  live: { color: 'bg-lightning-400', label: 'Live (WS)' },
-  http: { color: 'bg-amber-400', label: 'HTTP Fallback' },
-  offline: { color: 'bg-flame-500', label: 'Offline' },
+  live: { color: 'bg-emerald-500', label: 'Live' },
+  http: { color: 'bg-amber-500', label: 'HTTP Fallback' },
+  offline: { color: 'bg-slate-400', label: 'Offline' },
 };
 
 export function NavBar({ mode, onModeChange, connectionStatus }: NavBarProps) {
   const status = statusConfig[connectionStatus];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-        {/* Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-monad-500 to-monad-800 glow-border">
-            <Compass className="h-5 w-5 text-monad-50" />
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-slate-900 text-white shadow-soft">
+            <Compass className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-base font-bold tracking-tight text-monad-50 sm:text-lg">
+            <h1 className="text-base font-bold tracking-[-0.03em] text-slate-900 sm:text-lg">
               Trailblazers
             </h1>
-            <p className="hidden text-[10px] text-monad-300/60 sm:block">
+            <p className="hidden text-[10px] uppercase tracking-[0.12em] text-slate-500 sm:block">
               Monad EVM Gas Game
             </p>
           </div>
         </div>
 
-        {/* Mode Toggle */}
-        <div className="flex items-center gap-1 rounded-xl border border-slate-700 bg-slate-850 p-1">
+        <div className="flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1">
           <button
             onClick={() => onModeChange('player')}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:text-sm ${
               mode === 'player'
-                ? 'bg-monad-600 text-monad-50 shadow-lg shadow-monad-600/30'
-                : 'text-slate-400 hover:text-monad-200'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Smartphone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -54,8 +52,8 @@ export function NavBar({ mode, onModeChange, connectionStatus }: NavBarProps) {
             onClick={() => onModeChange('presenter')}
             className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:text-sm ${
               mode === 'presenter'
-                ? 'bg-monad-600 text-monad-50 shadow-lg shadow-monad-600/30'
-                : 'text-slate-400 hover:text-monad-200'
+                ? 'bg-slate-900 text-white shadow-sm'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <Monitor className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -63,10 +61,9 @@ export function NavBar({ mode, onModeChange, connectionStatus }: NavBarProps) {
           </button>
         </div>
 
-        {/* Connection Status */}
         <div className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${status.color} ${connectionStatus === 'connecting' ? 'animate-pulse' : ''}`} />
-          <span className="hidden text-xs font-medium text-slate-400 sm:inline">
+          <span className={`h-2.5 w-2.5 rounded-full ${status.color} ${connectionStatus === 'connecting' ? 'animate-pulse' : ''}`} />
+          <span className="hidden text-xs font-medium text-slate-600 sm:inline">
             {status.label}
           </span>
         </div>
