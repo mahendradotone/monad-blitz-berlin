@@ -9,6 +9,11 @@
     "dev": "npm run dev --workspace apps/web",
     "build": "npm run build --workspace apps/web",
     "typecheck": "npm run typecheck --workspace apps/web",
-    "fund-wallets": "node scripts/fund-wallets.mjs"
+    "fund-wallets": "node scripts/fund-wallets.mjs",
+    "deploy:testnet": "node scripts/deploy-trailblazers.mjs"
+  },
+  "dependencies": {
+    "ethers": "^6.17.0",
+    "solc": "^0.8.28"
   }
 }
