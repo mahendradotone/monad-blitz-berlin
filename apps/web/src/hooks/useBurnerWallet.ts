@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ethers, WebSocketProvider, JsonRpcProvider } from 'ethers';
+import { ethers, JsonRpcProvider } from 'ethers';
 
 const STORAGE_KEY = 'trailblazers_burner_key';
-
-type Provider = WebSocketProvider | JsonRpcProvider;
+const FAUCET_URL = 'https://agents.devnads.com/v1/faucet';
 
 interface BurnerWalletState {
   address: string;
@@ -11,29 +10,18 @@ interface BurnerWalletState {
   loading: boolean;
   faucetStatus: 'idle' | 'requesting' | 'success' | 'error';
   faucetMessage: string;
-  provider: Provider | null;
+  provider: JsonRpcProvider | null;
   signer: ethers.Wallet | null;
 }
 
-function getProvider(): Provider | null {
-  const wsUrl = import.meta.env.VITE_WS_URL || '';
+function getHttpProvider(): JsonRpcProvider | null {
   const rpcUrl = import.meta.env.VITE_RPC_URL || '';
-
-  if (wsUrl && wsUrl.startsWith('ws')) {
-    try {
-      return new WebSocketProvider(wsUrl);
-    } catch {
-      // fall through to rpc
-    }
+  if (!rpcUrl) return null;
+  try {
+    return new JsonRpcProvider(rpcUrl);
+  } catch {
+    return null;
   }
-  if (rpcUrl) {
-    try {
-      return new JsonRpcProvider(rpcUrl);
-    } catch {
-      return null;
-    }
-  }
-  return null;
 }
 
 function getInitialKey(): string | null {
@@ -68,7 +56,8 @@ export function useBurnerWallet() {
         localStorage.setItem(STORAGE_KEY, privateKey);
       }
 
-      const provider = getProvider();
+      // Always use HTTP for the signer — Monad WS RPC fails writes.
+      const provider = getHttpProvider();
       let wallet: ethers.Wallet;
 
       if (provider) {
@@ -128,12 +117,12 @@ export function useBurnerWallet() {
     }));
 
     try {
-      const resp = await fetch('https://agents.devnads.com/v1/faucet', {
+      const resp = await fetch(FAUCET_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          chainId: 10143, 
-          address: state.signer.address 
+        body: JSON.stringify({
+          chainId: 10143,
+          address: state.signer.address,
         }),
       });
 
@@ -141,14 +130,41 @@ export function useBurnerWallet() {
         throw new Error(`Faucet returned ${resp.status}`);
       }
 
-      const data = await resp.json().catch(() => ({}));
-      setState((prev) => ({
-        ...prev,
-        faucetStatus: 'success',
-        faucetMessage: `Sent ${Number(data.amount) / 1e18} MON via ${data.txHash.slice(0, 10)}...`,
-      }));
+      const data = await resp.json().catch(() => ({} as { amount?: string; txHash?: string }));
+      const provider = stateRef.current.provider;
 
-      setTimeout(() => refreshBalance(), 3000);
+      if (data.txHash && provider) {
+        try {
+          await provider.waitForTransaction(data.txHash, 1, 90_000);
+        } catch {
+          // Fall through to balance poll
+        }
+      }
+
+      // Confirm funds landed (tx wait can miss; poll briefly)
+      let funded = false;
+      if (provider && state.signer) {
+        for (let i = 0; i < 15; i++) {
+          const balance = await provider.getBalance(state.signer.address);
+          if (balance > 0n) {
+            setState((prev) => ({
+              ...prev,
+              balance,
+              faucetStatus: 'success',
+              faucetMessage: data.txHash
+                ? `Sent ${Number(data.amount ?? 0) / 1e18} MON via ${String(data.txHash).slice(0, 10)}...`
+                : 'Testnet funds received',
+            }));
+            funded = true;
+            break;
+          }
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+      }
+
+      if (!funded) {
+        throw new Error('Faucet tx submitted but funds not received yet — try again shortly');
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Faucet request failed';
       setState((prev) => ({
@@ -165,7 +181,7 @@ export function useBurnerWallet() {
         faucetMessage: '',
       }));
     }, 5000);
-  }, [state.signer, refreshBalance, state.address]);
+  }, [state.signer]);
 
   return {
     address: state.address,

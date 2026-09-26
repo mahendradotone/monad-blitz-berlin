@@ -5,7 +5,6 @@ import {
   Check,
   Droplets,
   Loader2,
-  ArrowUpRight,
   AlertCircle,
   CheckCircle2,
   Snowflake,
@@ -24,6 +23,7 @@ interface PlayerViewProps {
   cells: CellState[];
   pendingCell: number | null;
   moveEvents: MoveEvent[];
+  lastError?: string | null;
   onCellClick: (cellId: number) => void;
 }
 
@@ -35,6 +35,7 @@ export function PlayerView({
   cells,
   pendingCell,
   moveEvents,
+  lastError = null,
   onCellClick,
 }: PlayerViewProps) {
   const [copied, setCopied] = useState(false);
@@ -177,6 +178,12 @@ export function PlayerView({
             size="mobile"
           />
         </div>
+        {lastError && (
+          <div className="mt-2 flex items-center gap-1.5 text-xs text-rose-300">
+            <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+            {lastError}
+          </div>
+        )}
       </div>
 
       <div>

@@ -66,6 +66,7 @@ export default function App() {
             cells={trailblazers.cells}
             pendingCell={trailblazers.pendingCell}
             moveEvents={trailblazers.moveEvents}
+            lastError={trailblazers.lastError}
             onCellClick={handleCellClick}
           />
         ) : (
