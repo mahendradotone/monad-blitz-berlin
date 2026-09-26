@@ -14,7 +14,7 @@ export const DEFAULT_CONTRACT_ADDRESS =
 export const WS_URL = import.meta.env.VITE_WS_URL || '';
 export const RPC_URL = import.meta.env.VITE_RPC_URL || '';
 
-export const FAUCET_URL = 'http://localhost:3001/faucet';
+export const FAUCET_URL = 'https://agents.devnads.com/v1/faucet';
 
 export const TOTAL_CELLS = 100;
 export const GRID_SIZE = 10;

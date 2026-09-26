@@ -128,10 +128,13 @@ export function useBurnerWallet() {
     }));
 
     try {
-      const resp = await fetch('http://localhost:3001/faucet', {
+      const resp = await fetch('https://agents.devnads.com/v1/faucet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ address: state.signer.address }),
+        body: JSON.stringify({ 
+          chainId: 10143, 
+          address: state.signer.address 
+        }),
       });
 
       if (!resp.ok) {
@@ -142,7 +145,7 @@ export function useBurnerWallet() {
       setState((prev) => ({
         ...prev,
         faucetStatus: 'success',
-        faucetMessage: data.message || 'Testnet funds requested successfully',
+        faucetMessage: `Sent ${Number(data.amount) / 1e18} MON via ${data.txHash.slice(0, 10)}...`,
       }));
 
       setTimeout(() => refreshBalance(), 3000);
