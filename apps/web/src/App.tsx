@@ -59,9 +59,9 @@ export default function App() {
   const displayedMoves = simulationActive ? trailblazers.simMoveEvents : trailblazers.moveEvents;
 
   return (
-    <div className="min-h-screen bg-[#f3f0ea] text-slate-900">
+    <div className="min-h-screen bg-[#f5f1ea] text-stone-900">
       <div className="mx-auto max-w-[1600px] px-3 py-3 sm:px-5">
-        <div className="overflow-hidden rounded-[18px] border border-stone-200 bg-[#f8f6f2]/90 shadow-[0_12px_32px_rgba(24,24,27,0.04)] backdrop-blur-sm">
+        <div className="overflow-hidden rounded-[18px] border border-[#d9cfc3] bg-[#f9f6f1]/95 shadow-[0_12px_32px_rgba(29,26,23,0.05)] backdrop-blur-sm">
           <NavBar
             mode={mode}
             onModeChange={handleModeChange}

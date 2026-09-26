@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@500;600;700&family=Libre+Baskerville:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,14 +6,18 @@
 
 :root {
   color-scheme: light;
-  --bg: #f3f0ea;
-  --panel: rgba(255, 255, 255, 0.92);
+  --bg: #f5f1ea;
+  --panel: rgba(255, 255, 255, 0.94);
   --panel-strong: #ffffff;
-  --border: rgba(24, 24, 27, 0.12);
-  --text: #17181a;
-  --muted: #5b5f66;
-  --soft: #e7e1d8;
-  --shadow: rgba(24, 24, 27, 0.06);
+  --border: rgba(50, 46, 38, 0.12);
+  --text: #1d1a17;
+  --muted: #5d5650;
+  --soft: #eee4d8;
+  --shadow: rgba(29, 26, 23, 0.06);
+  --accent: #b67c57;
+  --accent-soft: #f3e6dc;
+  --sage: #5f7c68;
+  --sky: #6a8aa5;
 }
 
 * {
@@ -28,7 +32,10 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f7f4ef 0%, #f1efe9 100%);
+  background:
+    radial-gradient(circle at top left, rgba(182, 124, 87, 0.12), transparent 18%),
+    radial-gradient(circle at top right, rgba(111, 144, 170, 0.12), transparent 22%),
+    linear-gradient(180deg, #f8f4ef 0%, #f2efe9 100%);
   color: var(--text);
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -39,9 +46,9 @@ button, input {
   font: inherit;
 }
 
-h1, h2, h3, h4, .display-serif {
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  letter-spacing: -0.03em;
+h1, h2, h3, h4, .display-serif, .serif {
+  font-family: 'Cormorant Garamond', 'Libre Baskerville', Georgia, serif;
+  letter-spacing: -0.04em;
 }
 
 ::-webkit-scrollbar {
@@ -60,8 +67,8 @@ h1, h2, h3, h4, .display-serif {
 }
 
 ::selection {
-  background: rgba(30, 41, 59, 0.12);
-  color: #17181a;
+  background: rgba(111, 144, 170, 0.15);
+  color: #1d1a17;
 }
 
 .bg-grid-pattern {

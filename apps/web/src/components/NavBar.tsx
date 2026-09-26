@@ -20,29 +20,29 @@ export function NavBar({ mode, onModeChange, connectionStatus }: NavBarProps) {
   const status = statusConfig[connectionStatus];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-stone-200 bg-[#f8f6f2]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-[#dbcab9] bg-[#f9f6f1]/90 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <div className="flex items-center gap-2.5">
-          <div className="relative flex h-9 w-9 items-center justify-center rounded-md bg-stone-900 text-white shadow-sm">
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-md bg-[#2d2724] text-[#f8f4ee] shadow-sm">
             <Compass className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-base font-bold tracking-[-0.03em] text-stone-900 sm:text-lg">
+            <h1 className="display-serif text-base font-bold tracking-[-0.04em] text-[#1d1a17] sm:text-[1.7rem]">
               Trailblazers
             </h1>
-            <p className="hidden text-[10px] uppercase tracking-[0.12em] text-stone-500 sm:block">
+            <p className="hidden text-[10px] uppercase tracking-[0.12em] text-[#6c625b] sm:block">
               Monad EVM Gas Game
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 rounded-md border border-stone-200 bg-stone-100 p-1">
+        <div className="flex items-center gap-1 rounded-md border border-[#dcc9b9] bg-[#f0e7de] p-1">
           <button
             onClick={() => onModeChange('player')}
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:text-sm ${
               mode === 'player'
-                ? 'bg-stone-900 text-white shadow-sm'
-                : 'text-stone-600 hover:text-stone-900'
+                ? 'bg-[#2d2724] text-[#f8f4ee] shadow-sm'
+                : 'text-[#5d5650] hover:text-[#1d1a17]'
             }`}
           >
             <Smartphone className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -52,8 +52,8 @@ export function NavBar({ mode, onModeChange, connectionStatus }: NavBarProps) {
             onClick={() => onModeChange('presenter')}
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all sm:px-4 sm:text-sm ${
               mode === 'presenter'
-                ? 'bg-stone-900 text-white shadow-sm'
-                : 'text-stone-600 hover:text-stone-900'
+                ? 'bg-[#2d2724] text-[#f8f4ee] shadow-sm'
+                : 'text-[#5d5650] hover:text-[#1d1a17]'
             }`}
           >
             <Monitor className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -63,7 +63,7 @@ export function NavBar({ mode, onModeChange, connectionStatus }: NavBarProps) {
 
         <div className="flex items-center gap-2">
           <span className={`h-2.5 w-2.5 rounded-full ${status.color} ${connectionStatus === 'connecting' ? 'animate-pulse' : ''}`} />
-          <span className="hidden text-xs font-medium text-stone-600 sm:inline">
+          <span className="hidden text-xs font-medium text-[#5d5650] sm:inline">
             {status.label}
           </span>
         </div>
