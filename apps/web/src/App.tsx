@@ -42,7 +42,7 @@ export default function App() {
         }
       });
     },
-    [trailblazers, wallet.provider, wallet.signer, wallet.refreshBalance],
+    [trailblazers, wallet],
   );
 
   const handleToggleSimulation = useCallback(() => {

@@ -251,7 +251,6 @@ function StatCard({
   icon,
   label,
   value,
-  accentColor,
   gradient,
   border,
   subtitle,

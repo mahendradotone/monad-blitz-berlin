@@ -1,41 +1,61 @@
 # Trailblazers
 
-Trailblazers — a live EVM gas-physics game on Monad.
+Trailblazers is a live Monad gas-game demo that turns cold-versus-warm storage costs into a playable board. Players race to claim fresh cells, while repeated touches become cheaper and more efficient.
 
-The first time you touch a storage cell, it costs more. The second time is cheaper. Trailblazers turns the real cold-vs-warm storage cost model into a visible game board where players race to claim fresh territory and exploit existing trails.
+The project combines a React + Vite frontend with a Solidity contract deployed to the Monad testnet, using real on-chain state and a burner-wallet flow for live demo play.
 
-## What this project does
+## What it does
 
-- 10x10 board of storage cells
-- each move is on-chain contract interaction
-- first touch is the expensive cold-storage path
-- repeat touch is the cheaper warm-storage path
-- score and heatmap reflect the real accumulated state
+- 10x10 grid of storage cells
+- each move is an on-chain transaction
+- first touch = expensive cold-storage path
+- repeat touch = cheaper warm-storage path
+- scoring and heatmap reflect the real contract state
+- presenter mode surfaces gas ratios and live activity
 
-## Repo layout
+## Live demo
 
-- `apps/web` — React + Vite frontend
-- `contracts` — Solidity contract prototype for Monad testnet
-- `scripts` — wallet funding helpers
-- `docs` — Monad technical reference and context
+Production app:
 
-## Stack
+- https://monad-blitz-berlin-web.vercel.app
+
+## Tech stack
 
 - React + Vite + TypeScript
-- ethers.js
 - Tailwind CSS
+- ethers.js
 - Solidity
 - Monad testnet
 
-## Local setup
+## Repository layout
+
+- `apps/web` — front-end app
+- `contracts` — smart contract source
+- `scripts` — wallet funding and deployment utilities
+- `docs` — Monad references and supporting notes
+
+## Prerequisites
+
+- Node.js 18+
+- npm
+- a funded wallet for Monad testnet if you want to deploy or fund burner wallets
+
+## Local development
+
+From the project root:
 
 ```bash
-cd /home/mahendra/monad-blitz-berlin
-npm install --workspaces
+npm install
 npm run dev --workspace apps/web
 ```
 
-## Environment
+The app runs at the default Vite address:
+
+- http://localhost:5173
+
+## Environment setup
+
+Create the app environment file:
 
 ```bash
 cp apps/web/.env.example apps/web/.env
@@ -49,21 +69,23 @@ VITE_WS_URL=wss://testnet-rpc.monad.xyz/ws
 VITE_CONTRACT_ADDRESS=0x0000000000000000000000000000000000000000
 ```
 
-## Wallet funding flow
+## Demo wallet flow
 
-This project uses a burner wallet pattern for audience devices:
+The app uses a burner-wallet pattern for quick live demos:
 
 - each player gets a random private key
 - the browser stores it locally
-- the team funds a small test MON amount to that wallet
-- the wallet pays transaction gas on Monad testnet
+- a team wallet funds the account with test MON
+- the funded wallet pays gas for each move
 
-Points are separate from wallet balance:
+Important distinction:
 
-- wallet balance = test MON used to pay gas
-- score = game points on screen / contract state
+- wallet balance = MON used to pay gas
+- score = in-game points on the board / on-chain state
 
-## Smart contract concept
+## Contract overview
+
+The game logic rewards first-time discoveries more than repeated visits, matching the underlying cold-versus-warm storage economics.
 
 ```solidity
 function move(uint256 cellId) external {
@@ -79,7 +101,7 @@ function move(uint256 cellId) external {
 }
 ```
 
-## Funding a demo wallet batch
+## Funding demo wallets
 
 ```bash
 export TEAM_PRIVATE_KEY=0xYOUR_PRIVATE_KEY
@@ -87,6 +109,16 @@ export MONAD_RPC_URL=https://testnet-rpc.monad.xyz
 export WALLET_ADDRESSES=0xAAA,0xBBB,0xCCC
 export AMOUNT_ETH=0.05
 npm run fund-wallets
+```
+
+## Scripts
+
+```bash
+npm run dev --workspace apps/web
+npm run build --workspace apps/web
+npm run typecheck --workspace apps/web
+npm run fund-wallets
+npm run deploy:testnet
 ```
 
 ## License

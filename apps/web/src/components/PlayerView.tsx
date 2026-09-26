@@ -5,7 +5,6 @@ import {
   Check,
   Droplets,
   Loader2,
-  ArrowUpRight,
   AlertCircle,
   CheckCircle2,
   Snowflake,
@@ -27,9 +26,6 @@ interface PlayerViewProps {
   moveEvents: MoveEvent[];
   onCellClick: (cellId: number) => void;
 }
-
-const PIONEER_POINTS = 25;
-const FOLLOWER_POINTS = 10;
 
 export function PlayerView({
   wallet,
