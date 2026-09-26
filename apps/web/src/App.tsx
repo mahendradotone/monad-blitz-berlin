@@ -91,6 +91,8 @@ export default function App() {
                 onCellClick={handleCellClick}
                 simulationActive={simulationActive}
                 onToggleSimulation={handleToggleSimulation}
+                currentAddress={wallet.signer?.address ?? null}
+                contract={trailblazers.contract}
               />
             )}
           </main>

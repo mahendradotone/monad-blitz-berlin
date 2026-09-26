@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import type { Contract } from 'ethers';
 import {
   Flame,
   Zap,
@@ -9,6 +10,7 @@ import {
   Trophy,
 } from 'lucide-react';
 import { Grid } from '@/components/Grid';
+import { useLeaderboard } from '@/hooks/useLeaderboard';
 import type { CellState, MoveEvent } from '@/lib/contract';
 import { truncateAddress, formatGas } from '@/lib/utils';
 import type { ConnectionStatus } from '@/hooks/useTrailblazersContract';
@@ -25,9 +27,11 @@ interface PresenterModeProps {
   onCellClick: (cellId: number) => void;
   simulationActive: boolean;
   onToggleSimulation: () => void;
+  currentAddress?: string | null;
+  contract: Contract | null;
 }
 
-const GOAL_CELLS = 25;
+const TOTAL_CELLS = 100;
 
 export function PresenterMode({
   cells,
@@ -41,9 +45,12 @@ export function PresenterMode({
   onCellClick,
   simulationActive,
   onToggleSimulation,
+  currentAddress,
+  contract,
 }: PresenterModeProps) {
   const [pulseCellId, setPulseCellId] = useState<number | null>(null);
   const lastEventRef = useRef<number>(0);
+  const leaderboard = useLeaderboard(contract, cells, moveEvents, currentAddress);
 
   useEffect(() => {
     if (moveEvents.length > 0 && moveEvents[0].timestamp !== lastEventRef.current) {
@@ -59,7 +66,7 @@ export function PresenterMode({
     ? Number(pioneerGasSpent) / Number(followerGasSpent)
     : 0;
   const claimedCells = cells.filter((cell) => cell.visited).length;
-  const goalProgress = Math.min((claimedCells / GOAL_CELLS) * 100, 100);
+  const goalProgress = Math.min((claimedCells / TOTAL_CELLS) * 100, 100);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
@@ -68,7 +75,6 @@ export function PresenterMode({
           icon={<Flame className="h-6 w-6" />}
           label="Pioneer Gas (Cold)"
           value={formatGas(pioneerGasSpent)}
-          accentColor="slate"
           gradient="from-[#f7efe7] to-white"
           border="border-[#dccab8]"
           subtitle="First storage touch"
@@ -89,7 +95,6 @@ export function PresenterMode({
           icon={<Zap className="h-6 w-6" />}
           label="Follower Gas (Warm)"
           value={formatGas(followerGasSpent)}
-          accentColor="slate"
           gradient="from-[#eef3f5] to-white"
           border="border-[#d3dfe6]"
           subtitle="Repeated storage touch"
@@ -100,9 +105,9 @@ export function PresenterMode({
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center gap-2 text-[#1d1a17]">
             <Trophy className="h-4 w-4 text-[#8d6d53]" />
-            <span className="serif text-[1.5rem] font-semibold">Win condition</span>
+            <span className="serif text-[1.5rem] font-semibold">Board Coverage</span>
           </div>
-          <span className="font-sans text-xs text-[#1d1a17]">{claimedCells}/{GOAL_CELLS} cells</span>
+          <span className="font-sans text-xs text-[#1d1a17]">{claimedCells}/{TOTAL_CELLS} cells</span>
         </div>
         <div className="h-2.5 overflow-hidden rounded-full bg-[#e7ddd2]">
           <div
@@ -111,7 +116,7 @@ export function PresenterMode({
           />
         </div>
         <p className="mt-2 text-xs text-[#6c625b]">
-          First player to claim {GOAL_CELLS} cells wins the round. Cold paths are costly, warm trails are efficient.
+          Total claimed board space. The live leaderboard below shows who is ahead by score.
         </p>
       </div>
 
@@ -236,6 +241,39 @@ export function PresenterMode({
               )}
             </div>
           </div>
+
+          <div className="rounded-[16px] border border-[#dccab8] bg-[#f9f5f0] p-4 shadow-[0_8px_20px_rgba(29,26,23,0.04)]">
+            <div className="mb-3 flex items-center gap-2 text-[#1d1a17]">
+              <Trophy className="h-4 w-4 text-[#8d6d53]" />
+              <h3 className="serif text-[1.5rem] font-semibold">Leaderboard</h3>
+            </div>
+
+            {leaderboard.length === 0 ? (
+              <div className="text-sm text-[#6c625b]">No players yet.</div>
+            ) : (
+              <div className="space-y-2">
+                {leaderboard.map((entry) => {
+                  const isCurrent = currentAddress && entry.address.toLowerCase() === currentAddress.toLowerCase();
+                  return (
+                    <div
+                      key={entry.address}
+                      className={`flex items-center justify-between rounded-md border px-2.5 py-2 text-xs ${
+                        isCurrent
+                          ? 'border-[#8d6d53] bg-[#f0e5dc]'
+                          : 'border-[#dccab8] bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 font-semibold text-[#1d1a17]">#{entry.rank}</span>
+                        <span className="font-sans text-[#1d1a17]">{truncateAddress(entry.address)}</span>
+                      </div>
+                      <span className="font-sans font-semibold text-[#1d1a17]">{Number(entry.score)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -255,10 +293,9 @@ function StatCard({
   border,
   subtitle,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: string;
-  accentColor: 'slate';
   gradient: string;
   border: string;
   subtitle: string;

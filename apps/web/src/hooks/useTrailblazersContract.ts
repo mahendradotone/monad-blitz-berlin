@@ -465,6 +465,7 @@ export function useTrailblazersContract(
     connectionStatus: state.connectionStatus,
     pendingCell: state.pendingCell,
     lastError: state.lastError,
+    contract: state.contract,
     move,
     startSimulation,
     stopSimulation,
