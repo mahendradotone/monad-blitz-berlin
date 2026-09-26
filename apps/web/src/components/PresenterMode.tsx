@@ -151,13 +151,16 @@ export function PresenterMode({
                 <span className="text-sm text-[#433d38]">Simulate Live Game</span>
               </div>
               <button
+                type="button"
+                aria-label="Toggle simulated live game"
+                aria-pressed={simulationActive}
                 onClick={onToggleSimulation}
-                className={`relative h-6 w-11 rounded-full transition-colors ${
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ${
                   simulationActive ? 'bg-[#2d2724]' : 'bg-[#d7cabd]'
                 }`}
               >
                 <span
-                  className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                  className={`absolute h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
                     simulationActive ? 'translate-x-5' : 'translate-x-0.5'
                   }`}
                 />
