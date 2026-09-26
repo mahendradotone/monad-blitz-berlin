@@ -1,22 +1,26 @@
 # Trailblazers
 
-Trailblazers is a live EVM gas-physics game built for Monad. It turns the invisible cold-vs-warm storage cost model into a visible, player-driven board: the first time a cell is touched, it costs more; later touches are cheaper, and the heatmap reflects the real accumulated on-chain state.
+Trailblazers — a live EVM gas-physics game on Monad.
 
-## Why this project
+The first time you touch a storage cell, it costs more. The second time is cheaper. Trailblazers turns that real cold-vs-warm storage cost model into a visible game board, where players race to claim new territory and exploit existing trails.
 
-The idea is simple but technically sharp:
+## Project pitch
 
-- EVM storage access is not cost-neutral.
-- Cold storage access is more expensive than warm access.
-- Monad’s speed makes this cost difference visible in real time.
-- Trailblazers makes that mechanic a playable map instead of backend trivia.
+Every EVM chain has a real storage-access cost model that is normally hidden in gas accounting. On Monad, with fast blocks and low fees, that mechanic becomes visible in real time.
 
-The result is a fast, social demo where pioneers pay a premium to claim new territory while followers exploit existing trails at lower cost.
+Trailblazers makes the cost difference playable:
+
+- pioneers pay a premium to claim fresh cells
+- followers move cheaply along already-worn paths
+- the heatmap darkens as the trail gets used
+- the gas totals show the actual cost difference between cold and warm storage access
+
+This is not a metaphor. It is a real EVM behavior made visible and game-like.
 
 ## Repo layout
 
-- `apps/web` — React + Vite frontend for the player/presenter experience
-- `docs/reference` — design reference and static mockup inspiration
+- `apps/web` — React + Vite frontend for the player and presenter experience
+- `docs/reference` — sample mockup and visual inspiration
 - `LICENSE` — MIT license for public GitHub publishing
 
 ## Stack
@@ -34,17 +38,13 @@ npm install --workspaces
 npm run dev --workspace apps/web
 ```
 
-Then open the app in a browser and switch between player mode and presenter mode.
-
 ## Environment
-
-Copy the example env file inside the app before connecting to a real RPC or contract:
 
 ```bash
 cp apps/web/.env.example apps/web/.env
 ```
 
-Set values for:
+Fill in:
 
 - `VITE_RPC_URL`
 - `VITE_WS_URL`
@@ -52,15 +52,23 @@ Set values for:
 
 ## Demo flow
 
-- Open the app on a large display in presenter mode.
-- Invite players to tap cells on their phones.
-- Watch the heatmap, gas totals, and event feed update live.
-- Explain that the color and cost difference is a real EVM storage cost effect made visible by the gameplay loop.
+- Open the app on a big screen in presenter mode.
+- Invite players to tap cells from their phones.
+- Watch the heatmap and gas totals update live.
+- Explain that the cost difference on screen is real EVM storage behavior, not a visual effect.
 
 ## Notes
 
-This is intentionally a hackathon-style demo focused on a strong technical concept over production polish. It is designed to be easy to explain in a three-minute pitch and easy to redeploy if the contract or network changes.
+This project is built for a hackathon audience and is intentionally focused on a technically strong concept rather than production polish. It is designed to be easy to explain in a short pitch and easy to redeploy if the network or contract changes.
 
 ## License
 
 MIT
+
+## GitHub short description
+
+Live EVM gas-physics demo on Monad: cold vs warm storage becomes a playable trail map.
+
+## GitHub tag line
+
+Cold storage is the premium path. Warm storage is the worn trail.
