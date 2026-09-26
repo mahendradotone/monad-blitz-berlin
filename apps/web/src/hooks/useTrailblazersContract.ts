@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ethers, type Contract, type Provider, type WebSocketProvider } from 'ethers';
+import { ethers, type Contract, type Provider } from 'ethers';
 import {
   TRAILBLAZERS_ABI,
   DEFAULT_CONTRACT_ADDRESS,
   TOTAL_CELLS,
-  WS_URL,
   type CellState,
   type MoveEvent,
 } from '@/lib/contract';
@@ -174,55 +173,7 @@ export function useTrailblazersContract(
     }
 
     let cancelled = false;
-    let wsProvider: WebSocketProvider | null = null;
     let pollTimer: ReturnType<typeof setInterval> | null = null;
-    let wsContract: Contract | null = null;
-
-    async function startHttpPolling(httpContract: Contract, httpProvider: Provider) {
-      try {
-        const block = await httpProvider.getBlockNumber();
-        lastPolledBlock.current = Math.max(0, block - 5);
-      } catch {
-        lastPolledBlock.current = 0;
-      }
-
-      pollTimer = setInterval(async () => {
-        if (cancelled) return;
-        try {
-          const fromBlock = lastPolledBlock.current + 1;
-          const currentBlock = await httpProvider.getBlockNumber();
-          if (currentBlock < fromBlock) return;
-
-          const events = await httpContract.queryFilter(
-            httpContract.filters.Moved(),
-            fromBlock,
-            currentBlock,
-          );
-          lastPolledBlock.current = currentBlock;
-
-          for (const ev of events) {
-            if (!('args' in ev) || !ev.args) continue;
-            const [player, cellId, isPioneer, visitCount, gasUsed] = ev.args as unknown as [
-              string,
-              bigint,
-              boolean,
-              number | bigint,
-              bigint,
-            ];
-            applyMoved(
-              player,
-              Number(cellId),
-              Boolean(isPioneer),
-              Number(visitCount),
-              BigInt(gasUsed),
-              ev.transactionHash,
-            );
-          }
-        } catch {
-          // transient RPC errors — keep polling
-        }
-      }, POLL_INTERVAL_MS);
-    }
 
     async function setup() {
       const httpContract = new ethers.Contract(
@@ -250,67 +201,8 @@ export function useTrailblazersContract(
       await loadInitialState(httpContract);
       if (cancelled) return;
 
-      let wsLive = false;
-      if (WS_URL && WS_URL.startsWith('ws')) {
-        try {
-          wsProvider = new ethers.WebSocketProvider(WS_URL);
-          wsContract = new ethers.Contract(contractAddress, TRAILBLAZERS_ABI, wsProvider);
-          const filter = wsContract.filters.Moved();
-
-          await new Promise<void>((resolve, reject) => {
-            const timer = setTimeout(() => resolve(), 1000);
-            wsProvider!.once('error', (err) => {
-              clearTimeout(timer);
-              reject(err);
-            });
-            try {
-              wsContract!.on(filter, (player, cellId, isPioneer, visitCount, gasUsed, event) => {
-                if (cancelled) return;
-                applyMoved(
-                  player,
-                  Number(cellId),
-                  Boolean(isPioneer),
-                  Number(visitCount),
-                  BigInt(gasUsed),
-                  event?.log?.transactionHash,
-                );
-              });
-            } catch (err) {
-              clearTimeout(timer);
-              reject(err);
-            }
-          });
-
-          wsLive = true;
-        } catch {
-          wsLive = false;
-          if (wsContract) {
-            try {
-              wsContract.removeAllListeners();
-            } catch {
-              // ignore
-            }
-            wsContract = null;
-          }
-          if (wsProvider) {
-            try {
-              await wsProvider.destroy();
-            } catch {
-              // ignore
-            }
-            wsProvider = null;
-          }
-        }
-      }
-
-      if (!cancelled) {
-        setState((prev) => ({
-          ...prev,
-          connectionStatus: wsLive ? 'live' : 'http',
-        }));
-      }
-
-      // HTTP poll is the reliable path on Monad (WS log subscribe often 500s)
+      // Monad WS log subscriptions are currently unreliable (HTTP 500 / 429),
+      // so we intentionally avoid them and rely on the HTTP polling path.
       await startHttpPolling(httpContract, provider!);
     }
 
@@ -319,16 +211,6 @@ export function useTrailblazersContract(
     return () => {
       cancelled = true;
       if (pollTimer) clearInterval(pollTimer);
-      if (wsContract) {
-        try {
-          wsContract.removeAllListeners();
-        } catch {
-          // ignore
-        }
-      }
-      if (wsProvider) {
-        wsProvider.destroy().catch(() => {});
-      }
       if (contractRef.current) {
         try {
           contractRef.current.removeAllListeners();
