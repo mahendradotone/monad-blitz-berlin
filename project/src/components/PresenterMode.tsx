@@ -6,7 +6,6 @@ import {
   Activity,
   Radio,
   Settings2,
-  Trophy,
 } from 'lucide-react';
 import { Grid } from '@/components/Grid';
 import type { CellState, MoveEvent } from '@/lib/contract';
@@ -26,8 +25,6 @@ interface PresenterModeProps {
   simulationActive: boolean;
   onToggleSimulation: () => void;
 }
-
-const GOAL_CELLS = 25;
 
 export function PresenterMode({
   cells,
@@ -56,8 +53,6 @@ export function PresenterMode({
 
   const totalGas = pioneerGasSpent + followerGasSpent;
   const ratio = followerGasSpent > 0n ? Number(pioneerGasSpent) / Number(followerGasSpent) : 0;
-  const claimedCells = cells.filter((cell) => cell.visited).length;
-  const goalProgress = Math.min((claimedCells / GOAL_CELLS) * 100, 100);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
@@ -92,25 +87,6 @@ export function PresenterMode({
           border="border-cyan-500/30"
           subtitle="Repeated storage touch"
         />
-      </div>
-
-      <div className="mb-6 rounded-2xl border border-slate-700 bg-slate-900/70 p-4">
-        <div className="mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-slate-200">
-            <Trophy className="h-4 w-4 text-violet-300" />
-            <span className="text-sm font-semibold">Win condition</span>
-          </div>
-          <span className="font-mono text-xs text-cyan-300">{claimedCells}/100 cells</span>
-        </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-slate-800">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-violet-500 via-cyan-400 to-emerald-400 transition-all duration-500"
-            style={{ width: `${goalProgress}%` }}
-          />
-        </div>
-        <p className="mt-2 text-xs text-slate-400">
-          First player to claim {GOAL_CELLS} cells wins the round. Cold paths are costly, warm trails are efficient.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">

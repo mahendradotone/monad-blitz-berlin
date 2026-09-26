@@ -12,7 +12,6 @@ import {
   Flame,
   Zap,
   Route,
-  Trophy,
 } from 'lucide-react';
 import type { useBurnerWallet } from '@/hooks/useBurnerWallet';
 import { Grid } from '@/components/Grid';
@@ -26,9 +25,6 @@ interface PlayerViewProps {
   moveEvents: MoveEvent[];
   onCellClick: (cellId: number) => void;
 }
-
-const PIONEER_POINTS = 25;
-const FOLLOWER_POINTS = 10;
 
 export function PlayerView({
   wallet,
@@ -50,15 +46,6 @@ export function PlayerView({
     (e) => wallet.address && e.player.toLowerCase() === wallet.address.toLowerCase(),
   );
 
-  const myPioneers = myMoves.filter((move) => move.isPioneer).length;
-  const myFollowers = myMoves.filter((move) => !move.isPioneer).length;
-  const myScore = myMoves.reduce(
-    (sum, move) => sum + (move.isPioneer ? PIONEER_POINTS : FOLLOWER_POINTS),
-    0,
-  );
-  const myClaimedCells = cells.filter(
-    (cell) => cell.visited && cell.pioneer.toLowerCase() === wallet.address?.toLowerCase(),
-  ).length;
   const visitedCount = cells.filter((c) => c.visited).length;
 
   return (
@@ -96,36 +83,12 @@ export function PlayerView({
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          <div className="rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Trophy className="h-3.5 w-3.5 text-violet-300" />
-              Score
-            </div>
-            <div className="mt-1 font-mono text-lg font-bold text-violet-300">{myScore}</div>
-          </div>
-          <div className="rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Flame className="h-3.5 w-3.5 text-rose-300" />
-              Pioneers
-            </div>
-            <div className="mt-1 font-mono text-lg font-bold text-rose-300">{myPioneers}</div>
-          </div>
-          <div className="rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Zap className="h-3.5 w-3.5 text-cyan-300" />
-              Followers
-            </div>
-            <div className="mt-1 font-mono text-lg font-bold text-cyan-300">{myFollowers}</div>
-          </div>
-        </div>
-
         <div className="mt-4 flex items-center justify-between rounded-xl border border-slate-700 bg-slate-950/70 px-3 py-2">
           <div className="flex items-center gap-2 text-sm text-slate-300">
             <Route className="h-4 w-4 text-violet-300" />
-            <span>Objective</span>
+            <span>Trail status</span>
           </div>
-          <span className="font-mono text-sm text-cyan-300">{myClaimedCells} claimed cells</span>
+          <span className="font-mono text-sm text-cyan-300">{visitedCount}/100 explored</span>
         </div>
 
         <div className="mt-4">

@@ -2,33 +2,30 @@
 
 Trailblazers — a live EVM gas-physics game on Monad.
 
-The first time you touch a storage cell, it costs more. The second time is cheaper. Trailblazers turns that real cold-vs-warm storage cost model into a visible game board, where players race to claim new territory and exploit existing trails.
+The first time you touch a storage cell, it costs more. The second time is cheaper. Trailblazers turns the real cold-vs-warm storage cost model into a visible game board where players race to claim fresh territory and exploit existing trails.
 
-## Project pitch
+## What this project does
 
-Every EVM chain has a real storage-access cost model that is normally hidden in gas accounting. On Monad, with fast blocks and low fees, that mechanic becomes visible in real time.
-
-Trailblazers makes the cost difference playable:
-
-- pioneers pay a premium to claim fresh cells
-- followers move cheaply along already-worn paths
-- the heatmap darkens as the trail gets used
-- the gas totals show the actual cost difference between cold and warm storage access
-
-This is not a metaphor. It is a real EVM behavior made visible and game-like.
+- 10x10 board of storage cells
+- each move is on-chain contract interaction
+- first touch is the expensive cold-storage path
+- repeat touch is the cheaper warm-storage path
+- score and heatmap reflect the real accumulated state
 
 ## Repo layout
 
-- `apps/web` — React + Vite frontend for the player and presenter experience
-- `docs/reference` — sample mockup and visual inspiration
-- `LICENSE` — MIT license for public GitHub publishing
+- `apps/web` — React + Vite frontend
+- `contracts` — Solidity contract prototype for Monad testnet
+- `scripts` — wallet funding helpers
+- `docs` — Monad technical reference and context
 
 ## Stack
 
 - React + Vite + TypeScript
-- Tailwind CSS
 - ethers.js
-- Monad-compatible EVM wallet and contract flow
+- Tailwind CSS
+- Solidity
+- Monad testnet
 
 ## Local setup
 
@@ -44,31 +41,54 @@ npm run dev --workspace apps/web
 cp apps/web/.env.example apps/web/.env
 ```
 
-Fill in:
+Example values:
 
-- `VITE_RPC_URL`
-- `VITE_WS_URL`
-- `VITE_CONTRACT_ADDRESS`
+```env
+VITE_RPC_URL=https://testnet-rpc.monad.xyz
+VITE_WS_URL=wss://testnet-rpc.monad.xyz/ws
+VITE_CONTRACT_ADDRESS=0x0000000000000000000000000000000000000000
+```
 
-## Demo flow
+## Wallet funding flow
 
-- Open the app on a big screen in presenter mode.
-- Invite players to tap cells from their phones.
-- Watch the heatmap and gas totals update live.
-- Explain that the cost difference on screen is real EVM storage behavior, not a visual effect.
+This project uses a burner wallet pattern for audience devices:
 
-## Notes
+- each player gets a random private key
+- the browser stores it locally
+- the team funds a small test MON amount to that wallet
+- the wallet pays transaction gas on Monad testnet
 
-This project is built for a hackathon audience and is intentionally focused on a technically strong concept rather than production polish. It is designed to be easy to explain in a short pitch and easy to redeploy if the network or contract changes.
+Points are separate from wallet balance:
+
+- wallet balance = test MON used to pay gas
+- score = game points on screen / contract state
+
+## Smart contract concept
+
+```solidity
+function move(uint256 cellId) external {
+    if (!visited[cellId]) {
+        visited[cellId] = true;
+        pioneer[cellId] = msg.sender;
+        visitCount[cellId] = 1;
+        playerScore[msg.sender] += 25;
+    } else {
+        visitCount[cellId] += 1;
+        playerScore[msg.sender] += 10;
+    }
+}
+```
+
+## Funding a demo wallet batch
+
+```bash
+export TEAM_PRIVATE_KEY=0xYOUR_PRIVATE_KEY
+export MONAD_RPC_URL=https://testnet-rpc.monad.xyz
+export WALLET_ADDRESSES=0xAAA,0xBBB,0xCCC
+export AMOUNT_ETH=0.05
+npm run fund-wallets
+```
 
 ## License
 
 MIT
-
-## GitHub short description
-
-Live EVM gas-physics demo on Monad: cold vs warm storage becomes a playable trail map.
-
-## GitHub tag line
-
-Cold storage is the premium path. Warm storage is the worn trail.
